@@ -1,0 +1,15 @@
+org: kauamiguel
+app: backend-serverless
+service: serverless-demo-python
+
+provider:
+  name: aws
+  runtime: python3.12
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
