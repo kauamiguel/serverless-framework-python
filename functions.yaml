@@ -1,0 +1,18 @@
+usersList:
+  handler: users.list_users
+  environment:
+    USERS_TABLE_NAME: !Ref UsersTable
+  events:
+    - httpApi:
+        path: /users
+        method: get
+
+usersCreate:
+  handler: users.create_user
+  environment:
+    USERS_TABLE_NAME: !Ref UsersTable
+  events:
+    - httpApi:
+        path: /users
+        method: post
+  

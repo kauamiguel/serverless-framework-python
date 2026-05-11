@@ -5,11 +5,34 @@ service: serverless-demo-python
 provider:
   name: aws
   runtime: python3.12
+  memorySize: 256
+  timeout: 10
 
-functions:
-  hello:
-    handler: handler.hello
-    events:
-      - httpApi:
-          path: /
-          method: get
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:Scan
+          Resource: !GetAtt UsersTable.Arn
+
+functions: ${file(./functions.yaml)}
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-users-${sls:stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+
+  Outputs:
+    UsersTableName:
+      Value: !Ref UsersTable

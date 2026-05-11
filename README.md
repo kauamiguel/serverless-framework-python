@@ -12,9 +12,14 @@ authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
 
 # Serverless Framework Python HTTP API on AWS
 
-This template demonstrates how to make a simple HTTP API with Python running on AWS Lambda and API Gateway using the Serverless Framework.
+This template includes a **DynamoDB** table and two Lambdas for users (`usersList`, `usersCreate`), plus `hello` for `GET /`. Function definitions live in **`functions.yaml`** and are merged via `functions: ${file(./functions.yaml)}` in `serverless.yml`.
 
-This template does not include any kind of persistence (database). For more advanced examples, check out the [serverless/examples repository](https://github.com/serverless/examples/) which includes DynamoDB, Mongo, Fauna and other examples.
+- `GET /users` — returns up to 100 users (scan; suitable for demos only).
+- `POST /users` — JSON body `{"email":"you@example.com"}`; creates a row with `userId` (UUID), `email`, and `createdAt`.
+
+The table name is injected at deploy time as `USERS_TABLE_NAME`. No VPC or extra Python dependencies are required (`boto3` is in the Lambda runtime).
+
+This template demonstrates how to make a simple HTTP API with Python on AWS Lambda using the Serverless Framework. For more examples, see the [serverless/examples repository](https://github.com/serverless/examples/).
 
 ## Usage
 
@@ -40,13 +45,19 @@ _Note_: In current form, after deployment, your API is public and can be invoked
 
 ### Invocation
 
-After successful deployment, you can call the created application via HTTP:
+After successful deployment, you can call the created application via HTTP (replace the host with your deploy output):
 
 ```
 curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/
+curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/users
+curl -X POST https://xxxxxxx.execute-api.us-east-1.amazonaws.com/users \
+  -H "Content-Type: application/json" \
+  -d '{"email":"you@example.com"}'
 ```
 
-Which should result in response similar to the following (removed `input` content for brevity):
+`GET /` returns a hello message. `GET /users` and `POST /users` use DynamoDB.
+
+Which should result in response similar to the following for `GET /`:
 
 ```json
 {
@@ -67,7 +78,7 @@ Which should result in response similar to the following:
 ```json
 {
   "statusCode": 200,
-  "body": "{\n  \"message\": \"Go Serverless v4.0! Your function executed successfully!\"}"
+  "body": "{\"message\": \"Go Serverless v4.0! Your function executed successfully!\"}"
 }
 ```
 
